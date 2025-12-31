@@ -343,9 +343,10 @@ render_plugin_segment() {
 # Render all plugins from the plugin list
 # This is the main function that orchestrates plugin rendering
 # Usage: render_plugins ["side"]
-# - side: "left" or "right" (default: "right")
-#   - "left": plugins on left side of bar → RIGHT-pointing separators (▶)
-#   - "right": plugins on right side of bar → LEFT-pointing separators (◀)
+# - side: "left", "right", or "center" (default: "right")
+#   - "left": reads @powerkit_plugins_left → RIGHT-pointing separators (▶)
+#   - "right": reads @powerkit_plugins_right (fallback to @powerkit_plugins) → LEFT-pointing separators (◀)
+#   - "center": reads @powerkit_plugins → context-aware separators
 # Returns: complete formatted string for status bar
 render_plugins() {
     local side="${1:-right}"
@@ -361,9 +362,24 @@ render_plugins() {
     transparent=$(get_tmux_option "@powerkit_transparent" "${POWERKIT_DEFAULT_TRANSPARENT}")
     [[ "$transparent" == "true" ]] && status_bg="default"
 
-    # Get plugin list
+    # Get plugin list based on side
+    # Priority:
+    #   - left: @powerkit_plugins_left
+    #   - right: @powerkit_plugins_right (fallback to @powerkit_plugins for backward compatibility)
+    #   - center: @powerkit_plugins
     local plugins_str
-    plugins_str=$(get_tmux_option "@powerkit_plugins" "${POWERKIT_DEFAULT_PLUGINS}")
+    if [[ "$side" == "left" ]]; then
+        plugins_str=$(get_tmux_option "@powerkit_plugins_left" "${POWERKIT_DEFAULT_PLUGINS_LEFT}")
+    elif [[ "$side" == "right" ]]; then
+        # Try plugins_right first, fallback to plugins for backward compatibility
+        plugins_str=$(get_tmux_option "@powerkit_plugins_right" "")
+        if [[ -z "$plugins_str" ]]; then
+            plugins_str=$(get_tmux_option "@powerkit_plugins" "${POWERKIT_DEFAULT_PLUGINS}")
+        fi
+    else
+        # center or other: use @powerkit_plugins
+        plugins_str=$(get_tmux_option "@powerkit_plugins" "${POWERKIT_DEFAULT_PLUGINS}")
+    fi
     [[ -z "$plugins_str" ]] && return 0
 
     # Parse plugin list

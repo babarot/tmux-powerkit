@@ -87,6 +87,10 @@ set -g @powerkit_status_interval "5"
 
 # Make it transparent
 set -g @powerkit_transparent "true"
+
+# Separate left and right plugins
+set -g @powerkit_plugins_left "battery,datetime"
+set -g @powerkit_plugins_right "cpu,memory,hostname"
 ```
 
 **That's it!** Reload tmux and enjoy your new status bar.
@@ -596,6 +600,21 @@ set -g @powerkit_theme "catppuccin"
 set -g @powerkit_theme_variant "mocha"
 set -g @powerkit_plugin_timezones_zones "UTC,America/New_York,Europe/London"
 ```
+
+### Left/Right Split Setup
+
+```bash
+# Separate plugins on left and right sides of the status bar
+set -g @powerkit_plugins_left "battery,datetime"
+set -g @powerkit_plugins_right "cpu,memory,git,hostname"
+set -g @powerkit_theme "tokyo-night"
+set -g @powerkit_separator_style "rounded"
+
+# Example: Session info on left, plugins on both sides, windows in center
+set -g @powerkit_status_order "plugins,windows,session"
+```
+
+**Note:** When using `@powerkit_plugins_left` or `@powerkit_plugins_right`, the `@powerkit_plugins` option is only used as a fallback for the right side if `@powerkit_plugins_right` is not set.
 
 ---
 
